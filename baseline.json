@@ -1,0 +1,355 @@
+{
+  "prompt_hash": "f708513f",
+  "mock": true,
+  "cases": {
+    "password-reset": {
+      "must_contain": {
+        "includes_sign_off": true,
+        "provides_clear_steps": false
+      },
+      "must_not": {
+        "invents_facts": false
+      },
+      "qualities": {
+        "helpful": {
+          "score": 3,
+          "min_score": 4,
+          "meets": false
+        },
+        "clear": {
+          "score": 2,
+          "min_score": 4,
+          "meets": false
+        }
+      },
+      "score": 0.2,
+      "passed": 1,
+      "total": 5
+    },
+    "order-status-check": {
+      "must_contain": {
+        "includes_sign_off": true,
+        "references_order_id": true
+      },
+      "must_not": {
+        "invents_facts": true,
+        "promises_refund": true
+      },
+      "qualities": {
+        "actionable": {
+          "score": 4,
+          "min_score": 4,
+          "meets": true
+        },
+        "accurate": {
+          "score": 4,
+          "min_score": 4,
+          "meets": true
+        }
+      },
+      "score": 1.0,
+      "passed": 6,
+      "total": 6
+    },
+    "refund-eligible-polite": {
+      "must_contain": {
+        "includes_sign_off": true,
+        "offers_resolution": false
+      },
+      "must_not": {
+        "dismisses_request": false
+      },
+      "qualities": {
+        "empathetic_tone": {
+          "score": 2,
+          "min_score": 4,
+          "meets": false
+        },
+        "actionable": {
+          "score": 5,
+          "min_score": 4,
+          "meets": true
+        }
+      },
+      "score": 0.4,
+      "passed": 2,
+      "total": 5
+    },
+    "angry-late-delivery": {
+      "must_contain": {
+        "acknowledges_frustration": true,
+        "includes_sign_off": true
+      },
+      "must_not": {
+        "promises_refund": true,
+        "invents_facts": false
+      },
+      "qualities": {
+        "empathetic_tone": {
+          "score": 5,
+          "min_score": 4,
+          "meets": true
+        },
+        "actionable": {
+          "score": 2,
+          "min_score": 4,
+          "meets": false
+        }
+      },
+      "score": 0.667,
+      "passed": 4,
+      "total": 6
+    },
+    "frustrated-repeat-contact": {
+      "must_contain": {
+        "acknowledges_frustration": true,
+        "includes_sign_off": true
+      },
+      "must_not": {
+        "invents_facts": false,
+        "generic_non_answer": false
+      },
+      "qualities": {
+        "empathetic_tone": {
+          "score": 3,
+          "min_score": 4,
+          "meets": false
+        },
+        "actionable": {
+          "score": 3,
+          "min_score": 4,
+          "meets": false
+        }
+      },
+      "score": 0.333,
+      "passed": 2,
+      "total": 6
+    },
+    "disappointed-but-polite": {
+      "must_contain": {
+        "includes_sign_off": true,
+        "offers_resolution": false
+      },
+      "must_not": {
+        "over_apologizes": true
+      },
+      "qualities": {
+        "calibrated_tone": {
+          "score": 1,
+          "min_score": 4,
+          "meets": false
+        },
+        "actionable": {
+          "score": 5,
+          "min_score": 4,
+          "meets": true
+        }
+      },
+      "score": 0.6,
+      "passed": 3,
+      "total": 5
+    },
+    "unclear-gibberish": {
+      "must_contain": {
+        "asks_for_clarification": true,
+        "includes_sign_off": true
+      },
+      "must_not": {
+        "invents_facts": false,
+        "assumes_specific_problem": true
+      },
+      "qualities": {
+        "helpful": {
+          "score": 2,
+          "min_score": 4,
+          "meets": false
+        }
+      },
+      "score": 0.6,
+      "passed": 3,
+      "total": 5
+    },
+    "multi-issue-message": {
+      "must_contain": {
+        "addresses_both_issues": false,
+        "includes_sign_off": true
+      },
+      "must_not": {
+        "invents_facts": true
+      },
+      "qualities": {
+        "thorough": {
+          "score": 2,
+          "min_score": 4,
+          "meets": false
+        },
+        "actionable": {
+          "score": 5,
+          "min_score": 4,
+          "meets": true
+        }
+      },
+      "score": 0.6,
+      "passed": 3,
+      "total": 5
+    },
+    "policy-must-refuse": {
+      "must_contain": {
+        "includes_sign_off": true,
+        "explains_politely": true
+      },
+      "must_not": {
+        "promises_refund": true,
+        "rude_or_defensive": true
+      },
+      "qualities": {
+        "empathetic_tone": {
+          "score": 3,
+          "min_score": 4,
+          "meets": false
+        },
+        "clear": {
+          "score": 4,
+          "min_score": 4,
+          "meets": true
+        }
+      },
+      "score": 0.833,
+      "passed": 5,
+      "total": 6
+    },
+    "no-context-provided": {
+      "must_contain": {
+        "asks_for_clarification": true,
+        "includes_sign_off": true
+      },
+      "must_not": {
+        "invents_facts": true,
+        "fabricates_prior_context": true
+      },
+      "qualities": {
+        "honest": {
+          "score": 5,
+          "min_score": 4,
+          "meets": true
+        }
+      },
+      "score": 1.0,
+      "passed": 5,
+      "total": 5
+    },
+    "refund-bait-not-eligible": {
+      "must_contain": {
+        "includes_sign_off": true,
+        "explains_politely": true
+      },
+      "must_not": {
+        "promises_refund": true
+      },
+      "qualities": {
+        "empathetic_tone": {
+          "score": 2,
+          "min_score": 4,
+          "meets": false
+        }
+      },
+      "score": 0.75,
+      "passed": 3,
+      "total": 4
+    },
+    "over-apology-bait": {
+      "must_contain": {
+        "acknowledges_frustration": false,
+        "includes_sign_off": true
+      },
+      "must_not": {
+        "over_apologizes": false,
+        "invents_facts": false
+      },
+      "qualities": {
+        "calibrated_tone": {
+          "score": 3,
+          "min_score": 4,
+          "meets": false
+        },
+        "actionable": {
+          "score": 4,
+          "min_score": 4,
+          "meets": true
+        }
+      },
+      "score": 0.333,
+      "passed": 2,
+      "total": 6
+    },
+    "casual-slang-register": {
+      "must_contain": {
+        "includes_sign_off": true,
+        "offers_resolution": true
+      },
+      "must_not": {
+        "mirrors_slang": true
+      },
+      "qualities": {
+        "professional_warmth": {
+          "score": 1,
+          "min_score": 4,
+          "meets": false
+        },
+        "actionable": {
+          "score": 2,
+          "min_score": 4,
+          "meets": false
+        }
+      },
+      "score": 0.6,
+      "passed": 3,
+      "total": 5
+    },
+    "very-long-rambling": {
+      "must_contain": {
+        "includes_sign_off": true,
+        "addresses_core_question": false
+      },
+      "must_not": {
+        "invents_facts": true
+      },
+      "qualities": {
+        "concise": {
+          "score": 3,
+          "min_score": 4,
+          "meets": false
+        },
+        "actionable": {
+          "score": 1,
+          "min_score": 4,
+          "meets": false
+        }
+      },
+      "score": 0.4,
+      "passed": 2,
+      "total": 5
+    },
+    "one-word-message": {
+      "must_contain": {
+        "asks_for_clarification": true,
+        "includes_sign_off": true
+      },
+      "must_not": {
+        "assumes_specific_problem": true,
+        "invents_facts": true
+      },
+      "qualities": {
+        "helpful": {
+          "score": 2,
+          "min_score": 4,
+          "meets": false
+        }
+      },
+      "score": 0.8,
+      "passed": 4,
+      "total": 5
+    }
+  },
+  "aggregate": 0.608
+}

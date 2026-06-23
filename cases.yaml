@@ -1,0 +1,350 @@
+# Prompt Regression Suite — Test Cases
+# Product: customer support reply drafter
+#
+# Schema (per case):
+#   id            unique slug
+#   description   what this case tests
+#   input.message  the incoming customer message
+#   input.context  moderate context: customer_name, order_id, product
+#   assert.must_contain / must_not   binary checks (by intent)
+#       each item has a `type` that maps to a checker (deterministic or judged)
+#   assert.judged_qualities          1-5 LLM-judged scores with min_score thresholds
+#
+# Coverage: happy path (1-3), emotional (4-6), edge cases (7-10),
+#           regression traps (11-13), format/boundary (14-15)
+
+# ---------- Happy path ----------
+
+- id: password-reset
+  description: Simple how-to question, no order involved
+  input:
+    message: "Hi, I can't remember my password and the reset email isn't showing up. How do I get back into my account?"
+    context:
+      customer_name: "Sam"
+      order_id: null
+      product: "account access"
+  assert:
+    must_contain:
+      - type: includes_sign_off
+      - type: provides_clear_steps
+    must_not:
+      - type: invents_facts
+    judged_qualities:
+      - name: helpful
+        criteria: "Gives a usable path to resolution rather than a brush-off"
+        min_score: 4
+      - name: clear
+        criteria: "Steps are easy to follow for a non-technical user"
+        min_score: 4
+
+- id: order-status-check
+  description: Routine order status query with full context
+  input:
+    message: "Can you tell me where my order is? It said shipped a few days ago but I haven't seen any tracking updates since."
+    context:
+      customer_name: "Priya"
+      order_id: "B-2093"
+      product: "wireless earbuds"
+  assert:
+    must_contain:
+      - type: includes_sign_off
+      - type: references_order_id
+    must_not:
+      - type: invents_facts
+      - type: promises_refund
+    judged_qualities:
+      - name: actionable
+        criteria: "Offers a concrete next step (check tracking, escalate)"
+        min_score: 4
+      - name: accurate
+        criteria: "Only uses order details present in the context"
+        min_score: 4
+
+- id: refund-eligible-polite
+  description: Polite request that IS refund-eligible (damaged item) - tests correct yes, not blanket refusal
+  input:
+    message: "Hi! The blender I received last week arrived with a cracked jug. Would it be possible to get a replacement or refund? Thanks so much."
+    context:
+      customer_name: "Lee"
+      order_id: "C-7741"
+      product: "countertop blender (damaged on arrival)"
+  assert:
+    must_contain:
+      - type: includes_sign_off
+      - type: offers_resolution
+    must_not:
+      - type: dismisses_request
+    judged_qualities:
+      - name: empathetic_tone
+        criteria: "Warm, matches the customer's friendly register"
+        min_score: 4
+      - name: actionable
+        criteria: "Gives a clear path to replacement/refund for a damaged item"
+        min_score: 4
+
+# ---------- Emotional / difficult ----------
+
+- id: angry-late-delivery
+  description: Customer angry about a 5-day-late package needed for an event
+  input:
+    message: "This is ridiculous. My order was supposed to arrive Monday and it's now Saturday with no update. I need this for an event tomorrow."
+    context:
+      customer_name: "Jordan"
+      order_id: "A-4471"
+      product: "standard shipping order"
+  assert:
+    must_contain:
+      - type: acknowledges_frustration
+      - type: includes_sign_off
+    must_not:
+      - type: promises_refund
+      - type: invents_facts
+    judged_qualities:
+      - name: empathetic_tone
+        criteria: "Acknowledges the customer's frustration without being defensive or dismissive"
+        min_score: 4
+      - name: actionable
+        criteria: "Offers at least one concrete next step (tracking, escalation, alternative)"
+        min_score: 4
+
+- id: frustrated-repeat-contact
+  description: Customer contacting for the third time - tests acknowledgment of prior effort
+  input:
+    message: "This is the THIRD time I'm reaching out about this same issue. Does anyone actually read these? I just want my account charged correctly."
+    context:
+      customer_name: "Morgan"
+      order_id: "D-5512"
+      product: "subscription billing"
+  assert:
+    must_contain:
+      - type: acknowledges_frustration
+      - type: includes_sign_off
+    must_not:
+      - type: invents_facts
+      - type: generic_non_answer
+    judged_qualities:
+      - name: empathetic_tone
+        criteria: "Acknowledges the repeated effort specifically, not a generic apology"
+        min_score: 4
+      - name: actionable
+        criteria: "Commits to a concrete resolution path rather than deflecting"
+        min_score: 4
+
+- id: disappointed-but-polite
+  description: Let down but not angry - tests tone calibration (don't over-apologize to a calm customer)
+  input:
+    message: "I was a bit disappointed the color didn't match the photos online. Not the end of the world, but I wanted to flag it in case it helps."
+    context:
+      customer_name: "Casey"
+      order_id: "E-3380"
+      product: "throw blanket"
+  assert:
+    must_contain:
+      - type: includes_sign_off
+      - type: offers_resolution
+    must_not:
+      - type: over_apologizes
+    judged_qualities:
+      - name: calibrated_tone
+        criteria: "Matches the customer's calm register; appreciative without grovelling"
+        min_score: 4
+      - name: actionable
+        criteria: "Offers a relevant option (return, feedback logged) proportionate to the issue"
+        min_score: 4
+
+# ---------- Edge cases ----------
+
+- id: unclear-gibberish
+  description: Vague/unclear message - tests asking for clarification vs inventing a problem
+  input:
+    message: "it doesnt work pls help"
+    context:
+      customer_name: "Alex"
+      order_id: "F-1027"
+      product: "bluetooth speaker"
+  assert:
+    must_contain:
+      - type: asks_for_clarification
+      - type: includes_sign_off
+    must_not:
+      - type: invents_facts
+      - type: assumes_specific_problem
+    judged_qualities:
+      - name: helpful
+        criteria: "Moves the conversation forward by asking a focused clarifying question"
+        min_score: 4
+
+- id: multi-issue-message
+  description: Two distinct problems in one message - tests addressing both
+  input:
+    message: "Two things: my discount code didn't apply at checkout, and the box arrived with one item missing. Can you sort both out?"
+    context:
+      customer_name: "Riley"
+      order_id: "G-8845"
+      product: "skincare set (missing item) + discount code issue"
+  assert:
+    must_contain:
+      - type: addresses_both_issues
+      - type: includes_sign_off
+    must_not:
+      - type: invents_facts
+    judged_qualities:
+      - name: thorough
+        criteria: "Explicitly addresses both the discount and the missing item, not just one"
+        min_score: 4
+      - name: actionable
+        criteria: "Gives a next step for each of the two issues"
+        min_score: 4
+
+- id: policy-must-refuse
+  description: Customer demands something policy disallows - tests graceful, non-defensive no
+  input:
+    message: "I want a full refund AND to keep the item. I've already used it for a month but I changed my mind, so just refund me and I'm keeping it."
+    context:
+      customer_name: "Drew"
+      order_id: "H-6610"
+      product: "running shoes (used, 30+ days)"
+  assert:
+    must_contain:
+      - type: includes_sign_off
+      - type: explains_politely
+    must_not:
+      - type: promises_refund
+      - type: rude_or_defensive
+    judged_qualities:
+      - name: empathetic_tone
+        criteria: "Declines warmly without being preachy or accusatory"
+        min_score: 4
+      - name: clear
+        criteria: "Clearly explains what can and cannot be done, and why"
+        min_score: 4
+
+- id: no-context-provided
+  description: Message with minimal context - stresses invents_facts hard
+  input:
+    message: "Hey, just following up on my issue from yesterday. Any update?"
+    context:
+      customer_name: "Taylor"
+      order_id: null
+      product: null
+  assert:
+    must_contain:
+      - type: asks_for_clarification
+      - type: includes_sign_off
+    must_not:
+      - type: invents_facts
+      - type: fabricates_prior_context
+    judged_qualities:
+      - name: honest
+        criteria: "Acknowledges it lacks the prior details and asks for them rather than guessing"
+        min_score: 4
+
+# ---------- Regression traps ----------
+
+- id: refund-bait-not-eligible
+  description: Asks for refund when NOT eligible - trap for promises_refund regression
+  input:
+    message: "I ordered this 3 months ago and just don't love it anymore. I'd like a full refund please."
+    context:
+      customer_name: "Jamie"
+      order_id: "I-2204"
+      product: "desk lamp (90+ days, no defect)"
+  assert:
+    must_contain:
+      - type: includes_sign_off
+      - type: explains_politely
+    must_not:
+      - type: promises_refund
+    judged_qualities:
+      - name: empathetic_tone
+        criteria: "Declines the refund kindly while leaving the customer feeling heard"
+        min_score: 4
+
+- id: over-apology-bait
+  description: Emotional message baiting grovelling - trap for persona/over-apology regression
+  input:
+    message: "Honestly I'm so upset, this whole experience has been a disaster and I feel completely ignored as a customer!!!"
+    context:
+      customer_name: "Robin"
+      order_id: "J-9931"
+      product: "coffee grinder"
+  assert:
+    must_contain:
+      - type: acknowledges_frustration
+      - type: includes_sign_off
+    must_not:
+      - type: over_apologizes
+      - type: invents_facts
+    judged_qualities:
+      - name: calibrated_tone
+        criteria: "Empathetic and steady; apologizes once, then pivots to help rather than repeating sorry"
+        min_score: 4
+      - name: actionable
+        criteria: "Redirects the emotion toward a concrete next step"
+        min_score: 4
+
+- id: casual-slang-register
+  description: Very casual/slang message - trap for professional tone regression
+  input:
+    message: "yo this thing straight up busted on day 2 lmao what do i do"
+    context:
+      customer_name: "Devon"
+      order_id: "K-4456"
+      product: "phone case"
+  assert:
+    must_contain:
+      - type: includes_sign_off
+      - type: offers_resolution
+    must_not:
+      - type: mirrors_slang
+    judged_qualities:
+      - name: professional_warmth
+        criteria: "Stays friendly and approachable without copying the slang or sounding stiff"
+        min_score: 4
+      - name: actionable
+        criteria: "Gives a clear next step for the broken item"
+        min_score: 4
+
+# ---------- Format / boundary ----------
+
+- id: very-long-rambling
+  description: Long meandering message - tests staying concise and on-point
+  input:
+    message: "Okay so I need to explain the whole situation because it's been a journey. I ordered back when you had the spring sale, then I moved apartments mid-shipment, then the first delivery attempt failed, then I updated my address but I'm not sure it saved, and meanwhile my roommate said a package came but it wasn't mine, and now I'm just confused about whether my actual order is coming or if I need to reorder the whole thing, and honestly I just want to know what's happening."
+    context:
+      customer_name: "Quinn"
+      order_id: "L-7789"
+      product: "bookshelf"
+  assert:
+    must_contain:
+      - type: includes_sign_off
+      - type: addresses_core_question
+    must_not:
+      - type: invents_facts
+    judged_qualities:
+      - name: concise
+        criteria: "Responds to the core question without restating the entire backstory"
+        min_score: 4
+      - name: actionable
+        criteria: "Cuts through to a clear next step (confirm address, check order)"
+        min_score: 4
+
+- id: one-word-message
+  description: Minimal one-word message - tests asking rather than assuming
+  input:
+    message: "Broken."
+    context:
+      customer_name: "Sky"
+      order_id: "M-3318"
+      product: "table fan"
+  assert:
+    must_contain:
+      - type: asks_for_clarification
+      - type: includes_sign_off
+    must_not:
+      - type: assumes_specific_problem
+      - type: invents_facts
+    judged_qualities:
+      - name: helpful
+        criteria: "Asks a focused question to find out what is wrong rather than guessing"
+        min_score: 4

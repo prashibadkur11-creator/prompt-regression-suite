@@ -1,4 +1,5 @@
 # Prompt Regression Suite
+![License: MIT](https://img.shields.io/github/license/prashibadkur11-creator/prompt-regression-suite) ![CI](https://img.shields.io/github/actions/workflow/status/prashibadkur11-creator/prompt-regression-suite/prompt-ci.yml?branch=main&label=CI)
 
 Prompts are product surface area. Changing a prompt changes user-facing behavior as
 much as changing code does — yet prompts are usually edited casually, with no test of

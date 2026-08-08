@@ -1,23 +1,24 @@
 # Prompt Regression Suite
 ![License: MIT](https://img.shields.io/github/license/prashibadkur11-creator/prompt-regression-suite) ![CI](https://img.shields.io/github/actions/workflow/status/prashibadkur11-creator/prompt-regression-suite/prompt-ci.yml?branch=main&label=CI)
 
-Prompts are product surface area. Changing a prompt changes user-facing behavior as
-much as changing code does — yet prompts are usually edited casually, with no test of
-whether quality improved and no protection against silent regressions ("we made refusals
-politer and accidentally broke the JSON output").
-
 This repo applies CI discipline to prompts. Every prompt is a versioned file, every
-change goes through a pull request, and **CI runs the changed prompt against a fixed test
+change goes through a pull request, and CI runs the changed prompt against a fixed test
 set, scores the outputs, and fails the check if quality regresses against a committed
-baseline.** Prompts become change-controlled product assets instead of vibes-based edits.
+baseline.
+
+Changing a prompt changes user-facing behavior as much as changing code does. Prompts
+are usually edited casually, with no test of whether quality improved and no protection
+against silent regressions ("we made refusals politer and accidentally broke the JSON
+output").
+
+[TODO: why customer support, why 15 cases, what I was trying to catch]
 
 ## Demo product
 
 A **customer support reply drafter**: given a customer message and some context (name,
-order ID, product), it drafts a support reply. The product is intentionally simple so the
-prompts and tests are easy to read — and intentionally regression-prone (softening tone
-can break format; loosening refund language can break policy), so the test suite has real
-work to do.
+order ID, product), it drafts a support reply. The product is intentionally
+regression-prone (softening tone can break format; loosening refund language can break
+policy), so the test suite has real work to do.
 
 ## How it works
 
@@ -56,20 +57,18 @@ exact string (LLM output varies, so we test qualities, not literal text):
         min_score: 4
 ```
 
-Assertions are grouped **by intent** (`must_contain` / `must_not`) for readability. Each
-assertion's `type` maps to a checker that is either:
+Each assertion's `type` maps to a checker that is either:
 
-- **deterministic** (`scoring/deterministic.py`) — exact pattern checks like `includes_sign_off`
+- **deterministic** (`scoring/deterministic.py`). Exact pattern checks like `includes_sign_off`
   or `promises_refund`. Cheap, never flaky, no model calls.
-- **judged** (`scoring/judge.py`) — LLM-as-judge checks for things you can't regex, like
+- **judged** (`scoring/judge.py`). LLM-as-judge checks for things you can't regex, like
   `acknowledges_frustration` or the 1–5 quality scores.
 
-The design principle: use deterministic checks wherever possible, spend judge calls only
-where judgment is genuinely needed.
+Use deterministic checks wherever possible. Spend judge calls only where judgment is
+genuinely needed.
 
-A matched pair worth noting — `refund-eligible-polite` (damaged item, refund allowed) vs.
-`refund-bait-not-eligible` (change of mind, refund not allowed) — proves the suite tests
-refund logic in *both* directions, not a blanket ban on refund language.
+`refund-eligible-polite` covers a damaged item where a refund is allowed.
+`refund-bait-not-eligible` covers a change of mind where it is not.
 
 ## Running it
 
@@ -99,11 +98,9 @@ This repo is meant to be worked through pull requests:
 
 1. Create a branch and edit `prompts/draft_reply.txt`.
 2. Open a PR. The **Prompt CI** action runs the suite against the baseline.
-3. If a case regresses, the check fails — the prompt change is blocked until fixed.
+3. If a case regresses, the check fails and the prompt change is blocked until fixed.
 4. If you intentionally accept a new quality level, update `baseline.json` in the same PR
    so the change is visible in the diff.
-
-This is the whole point: prompt changes get the same change-control as code changes.
 
 ## Plugging in your own product
 
@@ -129,6 +126,16 @@ This is the whole point: prompt changes get the same change-control as code chan
 ├── baseline.json                  # committed baseline scores
 └── .github/workflows/prompt-ci.yml  # the PR gate
 ```
+
+## Limitations
+
+[TODO: --mock pseudo-scores validate the pipeline, not prompt quality]
+
+[TODO: judge score variance run-to-run, and how min_score: 4 was chosen]
+
+[TODO: 15 cases is demo-sized — what a real set would need]
+
+[TODO: baseline.json can be edited down in the same PR; deliberate trade-off]
 
 ## License
 

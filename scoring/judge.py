@@ -1,5 +1,5 @@
 """
-LLM-as-judge checks: for assertions that need judgment, not pattern matching.
+LLM-as-judge checks, for assertions that pattern matching cannot cover.
 
 Two kinds:
   - Binary judged assertions (e.g. acknowledges_frustration, invents_facts):
@@ -7,8 +7,8 @@ Two kinds:
   - Scored qualities (e.g. empathetic_tone): the judge returns a 1-5 score
     against the case's criteria, compared to min_score.
 
-Supports --mock mode so the full pipeline runs with no API key (deterministic
-pseudo-scores derived from the text), which keeps CI demos and local dev free.
+Supports --mock mode: pseudo-scores derived from a hash of the reply text, so the
+pipeline runs with no API key.
 """
 
 import hashlib

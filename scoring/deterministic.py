@@ -1,5 +1,5 @@
 """
-Deterministic checks: cheap, exact, never flaky. No model calls.
+Deterministic checks. Exact pattern matching against the reply, no model calls.
 
 Each function takes (reply_text, case) and returns True if the assertion HOLDS.
 For must_contain types, True means the desired property is present.

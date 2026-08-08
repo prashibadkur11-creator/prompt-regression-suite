@@ -11,8 +11,8 @@ Usage:
     python run_suite.py                          # real model + judge
     python run_suite.py --mock --check-baseline  # fail if scores regress
 
-Mock mode produces stable pseudo-scores so the pipeline is fully runnable
-without any API key — useful for local dev and for CI demos.
+Mock mode produces stable pseudo-scores, so the pipeline runs with no API key.
+Useful for local dev and CI demos.
 """
 
 import argparse
